@@ -79,7 +79,8 @@ class JsonRpc2Client {
   // Sends a JSON-RPC 2.0 Notification object, using given method and params, if present.
   // A JSON-RPC 2.0 Notification is a Response without the 'id' field.
   // No error or response is returned.
-  void sendNotification(String method, {Map<String, Object> params: const {}}) async {
+  Future<void> sendNotification(String method,
+      {Map<String, Object> params: const {}}) async {
     Map<String, Object> notification = {
       'jsonrpc': '2.0',
       'method': method,
@@ -111,7 +112,7 @@ class JsonRpc2Client {
 
   Future<http.Response> _executeHttpPostRequest(Map<String, Object> payload) {
     return _httpClient.post(
-      _serverURL,
+      Uri.parse(_serverURL),
       headers: _requestHeaders,
       body: json.encode(payload),
     );
@@ -124,7 +125,7 @@ class JsonRpc2Client {
 class JsonRpcError implements Exception {
   int code;
   String message;
-  Object data;
+  Object? data;
 
   JsonRpcError(this.code, this.message, [this.data]);
 
@@ -136,7 +137,7 @@ class JsonRpcError implements Exception {
 // It contains the response status code and the reason phrase describing the error.
 class HttpException implements Exception {
   int statusCode;
-  String reasonPhrase;
+  String? reasonPhrase;
 
   HttpException(this.statusCode, this.reasonPhrase);
 

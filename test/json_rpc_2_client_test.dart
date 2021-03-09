@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:http/http.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 import 'package:json_rpc_2_client/src/json_rpc_2_client.dart';
 
-class MockClient extends Mock implements Client {}
+import 'json_rpc_2_client_test.mocks.dart';
 
+@GenerateMocks([Client])
 void main() {
   const String mockMethod = "mock-method";
   const String mockServerURL = "https://mock-url.net/";
@@ -36,8 +38,8 @@ void main() {
         "params": {"mockKey": "mockValue"},
       };
 
-  final Client httpClient = MockClient();
-  JsonRpc2Client sut;
+  final MockClient httpClient = MockClient();
+  late JsonRpc2Client sut;
 
   setUp(() {
     sut = JsonRpc2Client(httpClient, mockServerURL);
@@ -57,19 +59,20 @@ void main() {
       expectedHeaders..addAll(mockHeadersMap);
       expectedHeaders["newHeader"] = "newHeaderValue";
 
-      verify(httpClient.post(mockServerURL,
+      verify(httpClient.post(Uri.parse(mockServerURL),
           headers: expectedHeaders,
           body: json.encode(validRequestObjectMap())));
     });
 
-    test('Test that JsonRpc2Client sends a valid notification object', () async {
+    test('Test that JsonRpc2Client sends a valid notification object',
+        () async {
       when(httpClient.post(any,
               headers: anyNamed("headers"), body: anyNamed("body")))
           .thenAnswer((_) async => Response(validResponseJson(), 200));
 
       await sut.sendNotification(mockMethod, params: mockParamsMap);
 
-      verify(httpClient.post(mockServerURL,
+      verify(httpClient.post(Uri.parse(mockServerURL),
           headers: mockHeadersMap,
           body: json.encode(validNotificationObjectMap())));
     });
@@ -81,7 +84,7 @@ void main() {
 
       await sut.sendRequest(mockMethod, params: mockParamsMap);
 
-      verify(httpClient.post(mockServerURL,
+      verify(httpClient.post(Uri.parse(mockServerURL),
           headers: mockHeadersMap, body: json.encode(validRequestObjectMap())));
     });
 
@@ -142,14 +145,14 @@ void main() {
 
     test(
         'Test that JsonRpc2Client throws a HttpException if something goes wrong during http request when sending a Notification Object',
-            () async {
-          when(httpClient.post(any,
+        () async {
+      when(httpClient.post(any,
               headers: anyNamed("headers"), body: anyNamed("body")))
-              .thenAnswer((_) async => Response("", 500));
+          .thenAnswer((_) async => Response("", 500));
 
-          expect(() => sut.sendNotification(mockMethod, params: mockParamsMap),
-              throwsA(TypeMatcher<HttpException>()));
-        });
+      expect(() => sut.sendNotification(mockMethod, params: mockParamsMap),
+          throwsA(TypeMatcher<HttpException>()));
+    });
 
     test(
         'Test that JsonRpc2Client throws a JsonRpcError when an errored jsonrpc response is received',
