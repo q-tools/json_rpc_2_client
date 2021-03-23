@@ -21,7 +21,11 @@ class JsonRpc2Client {
   Map<String, String> _requestHeaders = {'Content-Type': 'application/json'};
 
   // Sets an header which will be sent with the next requests.
-  setRequestHeader(String name, String value) {
+  setRequestHeader(String name, String? value) {
+    if (value == null) {
+      _requestHeaders.remove(name);
+      return;
+    }
     _requestHeaders[name] = value;
   }
 
