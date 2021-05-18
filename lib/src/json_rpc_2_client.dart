@@ -41,7 +41,7 @@ class JsonRpc2Client {
   //
   // In case of error, returns a JsonRpcError.
   Future sendRequest(String method,
-      {Map<String, Object> params: const {}}) async {
+      {Map<String, Object?> params: const {}}) async {
     Map<String, Object> request = {
       'id': 1,
       'jsonrpc': '2.0',
@@ -84,7 +84,7 @@ class JsonRpc2Client {
   // A JSON-RPC 2.0 Notification is a Response without the 'id' field.
   // No error or response is returned.
   Future<void> sendNotification(String method,
-      {Map<String, Object> params: const {}}) async {
+      {Map<String, Object?> params: const {}}) async {
     Map<String, Object> notification = {
       'jsonrpc': '2.0',
       'method': method,
